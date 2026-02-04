@@ -866,6 +866,14 @@ async def execute_arbitrage(request: ExecuteArbitrageRequest):
     if not opportunity:
         raise HTTPException(status_code=404, detail="Opportunity not found")
     
+    # Validate prices exist
+    buy_price = opportunity.get('buy_price', 0)
+    sell_price = opportunity.get('sell_price', 0)
+    if not buy_price or buy_price <= 0:
+        raise HTTPException(status_code=400, detail="Invalid opportunity: buy price is missing or zero. Cannot execute.")
+    if not sell_price or sell_price <= 0:
+        raise HTTPException(status_code=400, detail="Invalid opportunity: sell price is missing or zero. Cannot execute.")
+    
     settings = await db.settings.find_one({}, {"_id": 0})
     is_live = settings.get('is_live_mode', False) if settings else False
     telegram_enabled = settings.get('telegram_enabled', False) if settings else False
