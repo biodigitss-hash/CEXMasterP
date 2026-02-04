@@ -223,19 +223,24 @@ class CryptoArbitrageBotTester:
         # Test detect arbitrage (might be empty if no exchanges/tokens configured properly)
         success2, detected_opps = self.run_test("Detect arbitrage opportunities", "GET", "arbitrage/detect", 200)
         
-        # Test manual selection (only if we have token and exchange)
+        # Test manual selection (only if we have token)
         success3 = True
-        if self.test_token_id and self.test_exchange_id:
+        if self.test_token_id:
             manual_data = {
                 "token_id": self.test_token_id,
                 "buy_exchange": "binance",
-                "sell_exchange": "gateio"  # This will likely fail since we don't have real gateio configured
+                "sell_exchange": "kucoin"
             }
-            # This might fail due to missing exchange, but we test the endpoint
+            # This will likely fail since we don't have real exchanges configured
             success3, manual_opp = self.run_test("Create manual selection", "POST", "arbitrage/manual-selection", 404, data=manual_data)
-            # We expect 404 because the sell exchange doesn't exist
+            # We expect 404 because the exchanges don't exist
         
-        return success1 and success2 and success3
+        # Test arbitrage execution (test mode)
+        success4 = True
+        # We would need an opportunity ID to test execution, which we likely don't have
+        # without proper exchange configuration, so we skip this for now
+        
+        return success1 and success2 and success3 and success4
 
     def test_price_endpoints(self):
         """Test price monitoring endpoints"""
