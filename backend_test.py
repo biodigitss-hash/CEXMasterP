@@ -303,8 +303,9 @@ def main():
     
     # Print summary by test suite
     suite_names = [
-        "Health Endpoints", "Stats Endpoint", "Token Endpoints", 
-        "Exchange Endpoints", "Wallet Endpoints", "Arbitrage Endpoints",
+        "Health Endpoints", "Settings Endpoints (NEW)", "Telegram Endpoints (NEW)",
+        "Stats Endpoint", "Token Endpoints", "Exchange Endpoints", 
+        "Wallet Endpoints (Updated)", "Arbitrage Endpoints",
         "Price Endpoints", "WebSocket Endpoint"
     ]
     
