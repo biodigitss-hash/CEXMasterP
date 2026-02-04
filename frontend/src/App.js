@@ -183,6 +183,8 @@ function App() {
                       detectArbitrage={detectArbitrage}
                       settings={settings}
                       updateSettings={updateSettings}
+                      activePage={activePage}
+                      setActivePage={setActivePage}
                     />
                   )
                 } 
