@@ -276,7 +276,7 @@ export default function Activity() {
                   </div>
                 </div>
               ))}
-            </Accordion>
+            </div>
           )}
         </CardContent>
       </Card>
