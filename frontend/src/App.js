@@ -14,13 +14,43 @@ export const API = `${BACKEND_URL}/api`;
 let ws = null;
 
 function App() {
-  const [stats, setStats] = useState({ tokens: 0, exchanges: 0, opportunities: 0, completed_trades: 0, wallet: null });
+  const [stats, setStats] = useState({ tokens: 0, exchanges: 0, opportunities: 0, completed_trades: 0, wallet: null, is_live_mode: false });
   const [tokens, setTokens] = useState([]);
   const [exchanges, setExchanges] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
   const [prices, setPrices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activePage, setActivePage] = useState("dashboard");
+  const [settings, setSettings] = useState({
+    is_live_mode: false,
+    telegram_chat_id: "",
+    telegram_enabled: false,
+    min_spread_threshold: 0.5,
+    max_trade_amount: 1000,
+    slippage_tolerance: 0.5
+  });
+
+  const fetchSettings = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/settings`);
+      setSettings(res.data);
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+    }
+  }, []);
+
+  const updateSettings = useCallback(async (newSettings) => {
+    try {
+      const res = await axios.put(`${API}/settings`, newSettings);
+      setSettings(res.data);
+      toast.success("Settings updated successfully");
+      return res.data;
+    } catch (error) {
+      console.error("Error updating settings:", error);
+      toast.error("Failed to update settings");
+      throw error;
+    }
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -82,7 +112,8 @@ function App() {
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.type === "arbitrage_completed") {
-          toast.success(`Arbitrage completed! Profit: $${data.profit} (${data.profit_percent}%)`);
+          const modeLabel = data.is_live ? "🔴 LIVE" : "🟡 TEST";
+          toast.success(`${modeLabel} Arbitrage completed! Profit: $${data.profit} (${data.profit_percent}%)`);
           fetchData();
         }
       };
@@ -107,7 +138,8 @@ function App() {
   // Initial data fetch
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    fetchSettings();
+  }, [fetchData, fetchSettings]);
 
   // Periodic price updates
   useEffect(() => {
@@ -145,6 +177,8 @@ function App() {
                     fetchData={fetchData}
                     fetchPrices={fetchPrices}
                     detectArbitrage={detectArbitrage}
+                    settings={settings}
+                    updateSettings={updateSettings}
                   />
                 } 
               />
