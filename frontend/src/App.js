@@ -165,22 +165,26 @@ function App() {
               <Route 
                 path="/" 
                 element={
-                  <Dashboard 
-                    stats={stats}
-                    tokens={tokens}
-                    setTokens={setTokens}
-                    exchanges={exchanges}
-                    setExchanges={setExchanges}
-                    opportunities={opportunities}
-                    setOpportunities={setOpportunities}
-                    prices={prices}
-                    isLoading={isLoading}
-                    fetchData={fetchData}
-                    fetchPrices={fetchPrices}
-                    detectArbitrage={detectArbitrage}
-                    settings={settings}
-                    updateSettings={updateSettings}
-                  />
+                  activePage === "activity" ? (
+                    <Activity />
+                  ) : (
+                    <Dashboard 
+                      stats={stats}
+                      tokens={tokens}
+                      setTokens={setTokens}
+                      exchanges={exchanges}
+                      setExchanges={setExchanges}
+                      opportunities={opportunities}
+                      setOpportunities={setOpportunities}
+                      prices={prices}
+                      isLoading={isLoading}
+                      fetchData={fetchData}
+                      fetchPrices={fetchPrices}
+                      detectArbitrage={detectArbitrage}
+                      settings={settings}
+                      updateSettings={updateSettings}
+                    />
+                  )
                 } 
               />
             </Routes>
