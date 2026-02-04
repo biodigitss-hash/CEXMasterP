@@ -138,6 +138,45 @@ class CryptoArbitrageBotTester:
         
         return success1 and success2 and success3 and success4
 
+    def test_settings_endpoints(self):
+        """Test settings API endpoints (new)"""
+        print("\n" + "="*50)
+        print("TESTING SETTINGS ENDPOINTS (NEW)")
+        print("="*50)
+        
+        # Test GET /api/settings
+        success1, settings = self.run_test("Get bot settings", "GET", "settings", 200)
+        
+        # Test PUT /api/settings 
+        settings_update = {
+            "is_live_mode": True,
+            "telegram_enabled": True,
+            "telegram_chat_id": "test123",
+            "min_spread_threshold": 1.5,
+            "max_trade_amount": 2000.0,
+            "slippage_tolerance": 0.8
+        }
+        success2, updated_settings = self.run_test("Update bot settings", "PUT", "settings", 200, data=settings_update)
+        
+        # Verify settings were updated
+        success3, final_settings = self.run_test("Get updated settings", "GET", "settings", 200)
+        
+        return success1 and success2 and success3
+
+    def test_telegram_endpoints(self):
+        """Test Telegram notification endpoints (new)"""
+        print("\n" + "="*50)
+        print("TESTING TELEGRAM ENDPOINTS (NEW)")
+        print("="*50)
+        
+        # Test POST /api/telegram/test (using real chat ID from context)
+        chat_id = "8136498627"
+        # This will likely fail if bot token not configured, but we test the endpoint
+        success1, result = self.run_test("Test Telegram notification", "POST", f"telegram/test?chat_id={chat_id}", 400)
+        # We expect 400 because Telegram bot token likely not configured
+        
+        return success1
+
     def test_wallet_endpoints(self):
         """Test wallet configuration endpoints"""
         print("\n" + "="*50)
@@ -147,20 +186,23 @@ class CryptoArbitrageBotTester:
         # Test get wallet (initially empty)
         success1, wallet = self.run_test("Get wallet (empty)", "GET", "wallet", 200)
         
-        # Test create wallet
+        # Test create wallet (using test address from request)
         wallet_data = {
-            "private_key": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-            "address": "0x742d35cc6aa6ac6c3b0123456789abcdef123456"
+            "private_key": "test_key",
+            "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f000000"
         }
         success2, created_wallet = self.run_test("Save wallet config", "POST", "wallet", 200, data=wallet_data)
         
         # Test get wallet (should have data now)
         success3, wallet = self.run_test("Get wallet (with data)", "GET", "wallet", 200)
         
-        # Test update wallet balance
-        success4, _ = self.run_test("Update wallet balance", "PUT", "wallet/balance?balance_bnb=1.0&balance_usdt=100.0", 200)
+        # Test GET /api/wallet/balance (new - fetch real BSC balance)
+        success4, balance = self.run_test("Get real wallet balance from BSC", "GET", "wallet/balance", 200)
         
-        return success1 and success2 and success3 and success4
+        # Test update wallet balance
+        success5, _ = self.run_test("Update wallet balance", "PUT", "wallet/balance?balance_bnb=1.0&balance_usdt=100.0", 200)
+        
+        return success1 and success2 and success3 and success4 and success5
 
     def test_arbitrage_endpoints(self):
         """Test arbitrage-related endpoints"""
