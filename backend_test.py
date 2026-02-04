@@ -394,8 +394,8 @@ def main():
     suite_names = [
         "Health Endpoints", "Settings Endpoints (NEW)", "Telegram Endpoints (NEW)",
         "Stats Endpoint", "Token Endpoints", "Exchange Endpoints", 
-        "Wallet Endpoints (Updated)", "Arbitrage Endpoints",
-        "Price Endpoints", "WebSocket Endpoint"
+        "Wallet Endpoints (Updated)", "Arbitrage Endpoints (Updated)", 
+        "Activity Endpoint (NEW)", "Price Endpoints", "WebSocket Endpoint"
     ]
     
     print("\nTest Suite Results:")
