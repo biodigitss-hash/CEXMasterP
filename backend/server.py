@@ -43,6 +43,12 @@ BSC_TESTNET_RPC = "https://data-seed-prebsc-1-s1.binance.org:8545/"
 USDT_MAINNET = "0x55d398326f99059fF775485246999027B3197955"
 USDT_TESTNET = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd"
 
+# Arbitrage Configuration
+MIN_CONFIRMATIONS = 1  # Fast confirmations (30-60 seconds on BSC)
+WITHDRAWAL_TIMEOUT = 1800  # 30 minutes max
+DEPOSIT_TIMEOUT = 1800  # 30 minutes max
+MAX_RETRIES = 3  # For API calls
+
 # ERC20 ABI for balance checking
 ERC20_ABI = [
     {
