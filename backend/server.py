@@ -472,7 +472,7 @@ async def update_settings(settings_update: SettingsUpdate):
     update_data = {k: v for k, v in settings_update.model_dump().items() if v is not None}
     update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
     
-    result = await db.settings.update_one(
+    await db.settings.update_one(
         {},
         {"$set": update_data},
         upsert=True
