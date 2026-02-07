@@ -579,7 +579,7 @@ async def test_exchange_connection(exchange_data: ExchangeCreate):
         
         instance = exchange_class(config)
         await instance.load_markets()
-        balance = await instance.fetch_balance()
+        await instance.fetch_balance()  # Test connection by fetching balance
         await instance.close()
         
         return {"status": "success", "message": f"Connected to {exchange_data.name} successfully"}
