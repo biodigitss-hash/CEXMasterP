@@ -355,8 +355,9 @@ export default function ArbitrageCard({ opportunity, index, setOpportunities, fe
                     className="mt-0.5"
                   />
                   <label htmlFor="confirm-live" className="text-xs text-red-400 cursor-pointer">
-                    I understand that this is a <strong>LIVE TRADE</strong> with real funds. 
-                    I have verified the exchange balances and accept full responsibility for this transaction.
+                    I understand this is <strong>LIVE ARBITRAGE</strong> with real funds that will be transferred between my wallet and exchanges. 
+                    I have verified my wallet has sufficient USDT + BNB for gas, and accept full responsibility.
+                  </label>
                   </label>
                 </div>
               )}
