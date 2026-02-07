@@ -358,7 +358,6 @@ export default function ArbitrageCard({ opportunity, index, setOpportunities, fe
                     I understand this is <strong>LIVE ARBITRAGE</strong> with real funds that will be transferred between my wallet and exchanges. 
                     I have verified my wallet has sufficient USDT + BNB for gas, and accept full responsibility.
                   </label>
-                  </label>
                 </div>
               )}
 
