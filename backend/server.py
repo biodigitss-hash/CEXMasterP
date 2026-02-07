@@ -1061,13 +1061,13 @@ async def retry_with_backoff(func, max_retries=MAX_RETRIES, initial_delay=1):
     for attempt in range(max_retries):
         try:
             return await func()
-        except ccxt.RateLimitExceeded as e:
+        except ccxt.RateLimitExceeded:
             if attempt == max_retries - 1:
                 raise
             delay = initial_delay * (2 ** attempt)
             logger.warning(f"Rate limit hit, retrying in {delay}s...")
             await asyncio.sleep(delay)
-        except Exception as e:
+        except Exception:
             if attempt == max_retries - 1:
                 raise
             await asyncio.sleep(initial_delay)
