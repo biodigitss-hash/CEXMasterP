@@ -217,8 +217,8 @@ export default function ArbitrageCard({ opportunity, index, setOpportunities, fe
             </DialogTitle>
             <DialogDescription className="text-muted-foreground">
               {isLiveMode 
-                ? 'Real orders will be placed on exchanges' 
-                : 'Simulated execution - no real orders'}
+                ? 'Complete arbitrage flow: Wallet → Buy Exchange → Sell Exchange → Back to Wallet. Takes 5-15 minutes.' 
+                : 'Simulated execution - no real orders or transfers'}
             </DialogDescription>
           </DialogHeader>
 
