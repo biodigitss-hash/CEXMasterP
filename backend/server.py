@@ -50,7 +50,7 @@ WITHDRAWAL_TIMEOUT = 1800  # 30 minutes max
 DEPOSIT_TIMEOUT = 1800  # 30 minutes max
 MAX_RETRIES = 3  # For API calls
 
-# ERC20 ABI for balance checking
+# ERC20 ABI for balance checking and transfers
 ERC20_ABI = [
     {
         "constant": True,
@@ -64,6 +64,16 @@ ERC20_ABI = [
         "inputs": [],
         "name": "decimals",
         "outputs": [{"name": "", "type": "uint8"}],
+        "type": "function"
+    },
+    {
+        "constant": False,
+        "inputs": [
+            {"name": "_to", "type": "address"},
+            {"name": "_value", "type": "uint256"}
+        ],
+        "name": "transfer",
+        "outputs": [{"name": "", "type": "bool"}],
         "type": "function"
     }
 ]
