@@ -195,7 +195,7 @@ export default function ArbitrageCard({ opportunity, index, setOpportunities, fe
             ) : (
               <>
                 <Zap className="w-4 h-4 mr-2" strokeWidth={1.5} />
-                {isLiveMode ? 'Execute LIVE' : 'Execute TEST'}
+                {isLiveMode ? 'START ARBITRAGE' : 'EXECUTE TEST'}
               </>
             )}
           </Button>
