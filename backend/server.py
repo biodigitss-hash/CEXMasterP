@@ -916,8 +916,15 @@ async def execute_arbitrage(request: ExecuteArbitrageRequest):
     
     try:
         if is_live:
-            # ============== REAL ORDER EXECUTION ==============
-            result = await execute_real_arbitrage(opportunity, request.usdt_amount, slippage_tolerance, telegram_chat_id if telegram_enabled else None)
+            # ============== FULL ARBITRAGE WITH TRANSFERS ==============
+            # Check if wallet is configured for full arbitrage
+            wallet = await db.wallet.find_one({}, {"_id": 0})
+            if wallet and wallet.get('address'):
+                # Use full arbitrage with wallet transfers
+                result = await execute_full_arbitrage_with_transfers(opportunity, request.usdt_amount, slippage_tolerance, telegram_chat_id if telegram_enabled else None)
+            else:
+                # Fallback to legacy arbitrage (requires pre-positioned funds)
+                result = await execute_real_arbitrage(opportunity, request.usdt_amount, slippage_tolerance, telegram_chat_id if telegram_enabled else None)
         else:
             # ============== SIMULATED EXECUTION ==============
             result = await execute_simulated_arbitrage(opportunity, request.usdt_amount)
