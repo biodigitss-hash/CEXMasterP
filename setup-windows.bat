@@ -1,6 +1,6 @@
 @echo off
 REM Crypto Arbitrage Bot - Windows Setup Script
-REM This script helps you set up the bot on Windows with MySQL
+REM This script helps you set up the bot on Windows with MySQL (port 3307)
 
 echo ============================================
 echo Crypto Arbitrage Bot - Windows Setup
@@ -21,11 +21,12 @@ echo SUCCESS: Python is installed
 echo.
 
 REM Check MySQL
-echo [2/5] Checking MySQL service...
+echo [2/5] Checking MySQL service on port 3307...
 sc query MySQL80 >nul 2>&1
 if %errorlevel% neq 0 (
     echo WARNING: MySQL service not found
     echo Please install MySQL from https://dev.mysql.com/downloads/installer/
+    echo Configure MySQL to use port 3307
     echo See MYSQL_WINDOWS_SETUP.md for detailed installation guide
     echo.
     echo Press any key to continue anyway or Ctrl+C to exit...
@@ -95,17 +96,19 @@ echo ============================================
 echo Setup Complete!
 echo ============================================
 echo.
-echo IMPORTANT: Database Configuration
-echo ================================
+echo IMPORTANT: Database Configuration (MySQL on port 3307)
+echo ========================================================
 echo 1. Install MySQL (if not already installed)
 echo    Download: https://dev.mysql.com/downloads/installer/
+echo    Configure to use port 3307
 echo.
 echo 2. Create database:
-echo    mysql -u root -p
+echo    mysql -u root -p -P 3307
 echo    CREATE DATABASE crypto_arbitrage;
 echo    source database_schema.sql;
 echo.
 echo 3. Configure backend\.env file:
+echo    - Set MYSQL_PORT=3307
 echo    - Set MYSQL_PASSWORD to your MySQL root password
 echo    - Generate ENCRYPTION_KEY with:
 echo      python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
