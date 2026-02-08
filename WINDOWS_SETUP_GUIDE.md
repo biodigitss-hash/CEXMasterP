@@ -95,7 +95,7 @@ cd C:\Users\USER\Desktop\CEX BOT\CEX\CEXMasterP
 cd backend
 ```
 
-#### 2.3 Create Virtual Environment (Recommended)
+#### 3.3 Create Virtual Environment (Recommended)
 ```powershell
 # Create venv
 python -m venv venv
