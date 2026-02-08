@@ -9,11 +9,18 @@ import logging
 from typing import Optional, Dict, List, Any
 from datetime import datetime
 import uuid
+from pathlib import Path
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
-# Check which database to use
-USE_MONGODB = os.environ.get('MONGO_URL') is not None
+# Load environment variables first
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
+
+# Check which database to use based on env var availability
+MONGO_URL = os.environ.get('MONGO_URL')
+USE_MONGODB = MONGO_URL is not None and MONGO_URL.strip() != ''
 
 if USE_MONGODB:
     from motor.motor_asyncio import AsyncIOMotorClient
