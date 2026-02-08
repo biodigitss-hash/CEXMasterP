@@ -178,7 +178,7 @@ cd frontend
 npm install -g yarn
 ```
 
-#### 3.3 Install Dependencies
+#### 4.3 Install Dependencies
 ```powershell
 yarn install
 
