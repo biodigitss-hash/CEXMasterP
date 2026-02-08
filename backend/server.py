@@ -19,25 +19,15 @@ import ccxt.async_support as ccxt
 import httpx
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
-from mysql_helper import MySQLDatabase, Database
+from database_helper import create_database
 
 ROOT_DIR = Path(__file__).parent
 
 # Load environment variables from .env file
 load_dotenv(ROOT_DIR / '.env')
 
-# MySQL Configuration with fallback defaults
-mysql_config = {
-    'host': os.environ.get('MYSQL_HOST', 'localhost'),
-    'port': int(os.environ.get('MYSQL_PORT', 3306)),
-    'user': os.environ.get('MYSQL_USER', 'root'),
-    'password': os.environ.get('MYSQL_PASSWORD', ''),
-    'database': os.environ.get('MYSQL_DATABASE', 'crypto_arbitrage')
-}
-
-# Create MySQL database instance
-mysql_db = MySQLDatabase(**mysql_config)
-db = Database(mysql_db)
+# Create database instance (auto-detects MongoDB or MySQL)
+db_instance, db, IS_MONGODB = create_database()
 
 # Encryption key for API secrets
 ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY', Fernet.generate_key().decode())
