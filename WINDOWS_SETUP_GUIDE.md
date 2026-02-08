@@ -239,6 +239,48 @@ yarn start
    - Add: `C:\Python39` (or your Python install location)
    - Restart PowerShell
 
+### Issue: Backend Won't Start
+
+**Error: "Can't connect to MySQL"**
+```powershell
+# Check MySQL is running:
+# Windows: Check Services for MySQL80
+sc query MySQL80
+
+# If stopped, start it:
+net start MySQL80
+
+# Check credentials in backend/.env
+# Try connecting manually:
+mysql -u root -p crypto_arbitrage
+```
+
+**Error: "Access denied for user 'root'@'localhost'"**
+```powershell
+# Check password in .env file
+# Make sure MYSQL_PASSWORD matches your MySQL root password
+
+# Reset password if needed:
+# Stop MySQL, start in safe mode, reset password
+# (Search: "reset MySQL root password Windows")
+```
+
+**Error: "Unknown database 'crypto_arbitrage'"**
+```powershell
+# Database not created, create it:
+mysql -u root -p
+CREATE DATABASE crypto_arbitrage;
+exit;
+```
+
+**Error: "Table 'X' doesn't exist"**
+```powershell
+# Import schema:
+mysql -u root -p crypto_arbitrage < database_schema.sql
+
+# Or run CREATE TABLE statements manually
+```
+
 ### Issue: "MySQL connection failed"
 **Fix:**
 1. Open Services (Win+R → services.msc)
