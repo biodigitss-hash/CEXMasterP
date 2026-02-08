@@ -2059,13 +2059,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database connection on startup"""
+    try:
+        await mysql_db.connect()
+        logger.info("Application started successfully with MySQL")
+    except Exception as e:
+        logger.error(f"Startup error: {e}")
+        raise
+
 @app.on_event("shutdown")
-async def shutdown_db_client():
+async def shutdown_event():
     """Cleanup on shutdown"""
     # Close all exchange instances
     await close_exchange_instances()
     
-    # Close MongoDB connection
-    client.close()
+    # Close MySQL connection
+    await mysql_db.close()
     
     logger.info("Application shutdown complete")
