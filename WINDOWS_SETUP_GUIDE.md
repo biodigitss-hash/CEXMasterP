@@ -90,7 +90,7 @@ exit;
 cd C:\Users\USER\Desktop\CEX BOT\CEX\CEXMasterP
 ```
 
-#### 2.2 Go to Backend Folder
+#### 3.2 Go to Backend Folder
 ```powershell
 cd backend
 ```
