@@ -138,7 +138,7 @@ PORT=8001
 CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 ```
 
-#### 2.6 Generate Encryption Key
+#### 3.6 Generate Encryption Key
 ```powershell
 python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 
