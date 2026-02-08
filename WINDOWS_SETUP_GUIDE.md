@@ -230,12 +230,17 @@ yarn start
    - Add: `C:\Python39` (or your Python install location)
    - Restart PowerShell
 
-### Issue: "MongoDB connection failed"
+### Issue: "MySQL connection failed"
 **Fix:**
 1. Open Services (Win+R → services.msc)
-2. Find "MongoDB Server"
+2. Find "MySQL80" (or similar MySQL service)
 3. Right-click → Start
-4. If not found, reinstall MongoDB
+4. If not found, reinstall MySQL
+5. Verify MySQL is running:
+   ```powershell
+   mysql -u root -p
+   # Should connect without errors
+   ```
 
 ### Issue: "Port 8001 already in use"
 **Fix:**
