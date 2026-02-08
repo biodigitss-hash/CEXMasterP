@@ -2,7 +2,6 @@ from fastapi import FastAPI, APIRouter, HTTPException, WebSocket, WebSocketDisco
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
@@ -20,16 +19,25 @@ import ccxt.async_support as ccxt
 import httpx
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
+from mysql_helper import MySQLDatabase, Database
 
 ROOT_DIR = Path(__file__).parent
 
 # Load environment variables from .env file
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB Configuration with fallback defaults
-mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ.get('DB_NAME', 'crypto_arbitrage')]
+# MySQL Configuration with fallback defaults
+mysql_config = {
+    'host': os.environ.get('MYSQL_HOST', 'localhost'),
+    'port': int(os.environ.get('MYSQL_PORT', 3306)),
+    'user': os.environ.get('MYSQL_USER', 'root'),
+    'password': os.environ.get('MYSQL_PASSWORD', ''),
+    'database': os.environ.get('MYSQL_DATABASE', 'crypto_arbitrage')
+}
+
+# Create MySQL database instance
+mysql_db = MySQLDatabase(**mysql_config)
+db = Database(mysql_db)
 
 # Encryption key for API secrets
 ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY', Fernet.generate_key().decode())
