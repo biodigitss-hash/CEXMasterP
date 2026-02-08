@@ -120,15 +120,15 @@ pip install -r requirements.txt
 # - etc.
 ```
 
-#### 3.5 Create .env File (Optional but Recommended)
+#### 3.5 Create Environment File
 Create a file named `.env` in the `backend` folder with this content:
 
 ```env
-# MySQL Configuration
+# MySQL Database Configuration
 MYSQL_HOST=localhost
 MYSQL_PORT=3306
 MYSQL_USER=root
-MYSQL_PASSWORD=your_mysql_password
+MYSQL_PASSWORD=your_actual_mysql_password_here
 MYSQL_DATABASE=crypto_arbitrage
 
 # Encryption Key - GENERATE A NEW ONE!
