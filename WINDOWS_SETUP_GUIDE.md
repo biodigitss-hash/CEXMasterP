@@ -106,7 +106,7 @@ venv\Scripts\activate
 # You should see (venv) in your prompt
 ```
 
-#### 2.4 Install Dependencies
+#### 3.4 Install Dependencies
 ```powershell
 pip install -r requirements.txt
 
