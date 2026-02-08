@@ -146,7 +146,7 @@ python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().d
 # Paste it as ENCRYPTION_KEY in .env file
 ```
 
-#### 2.7 Start Backend Server
+#### 3.7 Start Backend Server
 ```powershell
 # Make sure you're in backend folder with venv activated
 python server.py
