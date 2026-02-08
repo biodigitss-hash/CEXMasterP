@@ -1,6 +1,6 @@
 @echo off
 REM Crypto Arbitrage Bot - Windows Setup Script
-REM This script helps you set up the bot on Windows
+REM This script helps you set up the bot on Windows with MySQL
 
 echo ============================================
 echo Crypto Arbitrage Bot - Windows Setup
@@ -20,13 +20,18 @@ if %errorlevel% neq 0 (
 echo SUCCESS: Python is installed
 echo.
 
-REM Check MongoDB
-echo [2/5] Checking MongoDB service...
-sc query MongoDB >nul 2>&1
+REM Check MySQL
+echo [2/5] Checking MySQL service...
+sc query MySQL80 >nul 2>&1
 if %errorlevel% neq 0 (
-    echo WARNING: MongoDB service not found
-    echo Please install MongoDB from https://www.mongodb.com/try/download/community
-    echo Or the bot will use default connection: mongodb://localhost:27017/
+    echo WARNING: MySQL service not found
+    echo Please install MySQL from https://dev.mysql.com/downloads/installer/
+    echo See MYSQL_WINDOWS_SETUP.md for detailed installation guide
+    echo.
+    echo Press any key to continue anyway or Ctrl+C to exit...
+    pause >nul
+) else (
+    echo SUCCESS: MySQL service found
 )
 echo.
 
@@ -53,14 +58,14 @@ if not exist venv (
 echo Activating virtual environment...
 call venv\Scripts\activate.bat
 
-echo Installing Python packages...
+echo Installing Python packages (including MySQL drivers)...
 pip install -r requirements.txt
 if %errorlevel% neq 0 (
     echo ERROR: Failed to install Python dependencies
     pause
     exit /b 1
 )
-echo SUCCESS: Backend dependencies installed
+echo SUCCESS: Backend dependencies installed (including aiomysql, PyMySQL)
 cd ..
 echo.
 
@@ -90,14 +95,27 @@ echo ============================================
 echo Setup Complete!
 echo ============================================
 echo.
-echo Next steps:
-echo 1. Configure backend\.env file (see WINDOWS_SETUP_GUIDE.md)
-echo 2. Generate encryption key
-echo 3. Run start-backend.bat in one window
-echo 4. Run start-frontend.bat in another window
+echo IMPORTANT: Database Configuration
+echo ================================
+echo 1. Install MySQL (if not already installed)
+echo    Download: https://dev.mysql.com/downloads/installer/
+echo.
+echo 2. Create database:
+echo    mysql -u root -p
+echo    CREATE DATABASE crypto_arbitrage;
+echo    source database_schema.sql;
+echo.
+echo 3. Configure backend\.env file:
+echo    - Set MYSQL_PASSWORD to your MySQL root password
+echo    - Generate ENCRYPTION_KEY with:
+echo      python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+echo.
+echo 4. Run the application:
+echo    - Double-click start-backend.bat
+echo    - Double-click start-frontend.bat (in new window)
 echo.
 echo For detailed instructions, see:
-echo - WINDOWS_SETUP_GUIDE.md
-echo - LOCAL_INSTALLATION_COMPLETE_GUIDE.md
+echo - MYSQL_WINDOWS_SETUP.md (MySQL setup guide)
+echo - WINDOWS_SETUP_GUIDE.md (General Windows setup)
 echo.
 pause
