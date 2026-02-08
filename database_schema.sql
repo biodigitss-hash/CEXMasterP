@@ -1,10 +1,11 @@
 -- MySQL Database Schema for Crypto Arbitrage Bot
+-- NOTE: Uses port 3307 for local Windows setup
 
 -- Create database
 CREATE DATABASE IF NOT EXISTS crypto_arbitrage;
 USE crypto_arbitrage;
 
--- Settings Table
+-- Settings Table (with fail-safe arbitrage settings)
 CREATE TABLE IF NOT EXISTS settings (
     id VARCHAR(36) PRIMARY KEY,
     is_live_mode BOOLEAN DEFAULT FALSE,
@@ -13,6 +14,10 @@ CREATE TABLE IF NOT EXISTS settings (
     min_spread_threshold DECIMAL(5, 2) DEFAULT 0.5,
     max_trade_amount DECIMAL(20, 2) DEFAULT 1000.00,
     slippage_tolerance DECIMAL(5, 2) DEFAULT 0.5,
+    -- Fail-safe arbitrage settings
+    target_sell_spread DECIMAL(5, 2) DEFAULT 85.0,  -- Target spread % to trigger sell
+    spread_check_interval INT DEFAULT 10,           -- Seconds between spread checks
+    max_wait_time INT DEFAULT 3600,                 -- Max time to wait for target spread (seconds)
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -66,13 +71,31 @@ CREATE TABLE IF NOT EXISTS arbitrage_opportunities (
     spread_percent DECIMAL(10, 4) NOT NULL,
     confidence DECIMAL(5, 2) NOT NULL,
     recommended_usdt_amount DECIMAL(20, 2),
-    status ENUM('detected', 'executing', 'completed', 'failed', 'manual') DEFAULT 'detected',
+    status ENUM('detected', 'executing', 'completed', 'failed', 'manual', 'monitoring') DEFAULT 'detected',
     is_manual_selection BOOLEAN DEFAULT FALSE,
     detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     persistence_minutes INT DEFAULT 0,
     INDEX idx_status (status),
     INDEX idx_token_symbol (token_symbol),
     INDEX idx_detected (detected_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Fail-Safe Arbitrage State Table (tracks ongoing fail-safe executions)
+CREATE TABLE IF NOT EXISTS failsafe_states (
+    id VARCHAR(36) PRIMARY KEY,
+    opportunity_id VARCHAR(36) NOT NULL,
+    status ENUM('pending', 'funding_cex_a', 'bought', 'withdrawn', 'funding_cex_b', 'monitoring', 'selling', 'sold', 'completed', 'failed') DEFAULT 'pending',
+    token_symbol VARCHAR(20) NOT NULL,
+    buy_exchange VARCHAR(100) NOT NULL,
+    sell_exchange VARCHAR(100) NOT NULL,
+    tokens_held DECIMAL(20, 8) DEFAULT 0,
+    usdt_invested DECIMAL(20, 2) DEFAULT 0,
+    current_spread DECIMAL(10, 4) DEFAULT 0,
+    target_spread DECIMAL(5, 2) DEFAULT 85.0,
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_opportunity (opportunity_id),
+    INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Transaction Logs Table
@@ -89,7 +112,7 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     INDEX idx_step (step)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Insert default settings
-INSERT INTO settings (id, is_live_mode, telegram_enabled, min_spread_threshold, max_trade_amount, slippage_tolerance)
-VALUES (UUID(), FALSE, FALSE, 0.5, 1000.00, 0.5)
+-- Insert default settings with fail-safe configuration
+INSERT INTO settings (id, is_live_mode, telegram_enabled, min_spread_threshold, max_trade_amount, slippage_tolerance, target_sell_spread, spread_check_interval, max_wait_time)
+VALUES (UUID(), FALSE, FALSE, 0.5, 1000.00, 0.5, 85.0, 10, 3600)
 ON DUPLICATE KEY UPDATE id=id;
