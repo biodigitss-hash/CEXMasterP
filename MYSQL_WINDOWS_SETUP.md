@@ -2,7 +2,9 @@
 
 ## Quick Overview
 
-Your Crypto Arbitrage Bot now uses **MySQL** instead of MongoDB. This guide shows you how to set it up on Windows.
+Your Crypto Arbitrage Bot uses **MySQL on port 3307** for the database. This guide shows you how to set it up on Windows.
+
+**IMPORTANT:** The default MySQL port is 3306, but this setup uses **port 3307** to avoid conflicts with other installations.
 
 ---
 
@@ -18,7 +20,7 @@ Your Crypto Arbitrage Bot now uses **MySQL** instead of MongoDB. This guide show
 2. Choose **"Developer Default"** or **"Server only"**
 3. Click **Next** through the configuration
 4. **Important Settings:**
-   - Port: **3306** (default)
+   - **Port: 3307** ⚠️ (NOT the default 3306!)
    - Root Password: **Create a strong password and remember it!**
    - Windows Service: **MySQL80** (check "Start at System Startup")
    - Authentication: Choose **"Use Strong Password Encryption"**
@@ -40,16 +42,18 @@ sc query MySQL80
 
 ### Option A: Using MySQL Command Line
 ```powershell
-# Login to MySQL
-mysql -u root -p
+# Login to MySQL (note the port 3307)
+mysql -u root -p -P 3307
 # Enter your root password when prompted
 
 # In MySQL console, run:
 CREATE DATABASE crypto_arbitrage;
 USE crypto_arbitrage;
 
-# Run the schema file (copy from database_schema.sql)
-# Or paste each CREATE TABLE statement
+# Import schema file
+SOURCE database_schema.sql;
+
+# Or paste each CREATE TABLE statement from database_schema.sql
 
 # Verify tables were created:
 SHOW TABLES;
@@ -57,6 +61,7 @@ SHOW TABLES;
 # Should show:
 # - arbitrage_opportunities
 # - exchanges
+# - failsafe_states
 # - settings
 # - tokens
 # - transaction_logs
@@ -85,15 +90,19 @@ exit;
 Open `backend\.env` and update these lines:
 
 ```env
-# MySQL Configuration
+# MySQL Configuration (port 3307)
 MYSQL_HOST=localhost
-MYSQL_PORT=3306
+MYSQL_PORT=3307
 MYSQL_USER=root
 MYSQL_PASSWORD=your_actual_password_here
 MYSQL_DATABASE=crypto_arbitrage
 
 # Generate Encryption Key
 ENCRYPTION_KEY=paste_generated_key_here
+
+# App Configuration
+CORS_ORIGINS="*"
+TELEGRAM_BOT_TOKEN=""
 ```
 
 ### Generate Encryption Key
@@ -138,7 +147,7 @@ async def test_connection():
     try:
         conn = await aiomysql.connect(
             host='localhost',
-            port=3306,
+            port=3307,  # Note: port 3307
             user='root',
             password='your_password',  # Change this!
             db='crypto_arbitrage'
@@ -165,9 +174,10 @@ python test_mysql.py
 
 # Should show:
 # ✅ MySQL Connection Successful!
-# Tables found: 6
+# Tables found: 7
 #   - arbitrage_opportunities
 #   - exchanges
+#   - failsafe_states
 #   - settings
 #   - tokens
 #   - transaction_logs
@@ -179,10 +189,11 @@ python test_mysql.py
 ## Step 6: Start the Application
 
 ### Start Backend
+Double-click `start-backend.bat` or run:
 ```powershell
 cd backend
 venv\Scripts\activate
-python server.py
+python -m uvicorn server:app --host 0.0.0.0 --port 8001 --reload
 
 # Should see:
 # INFO: MySQL connection pool created: crypto_arbitrage
@@ -191,6 +202,7 @@ python server.py
 ```
 
 ### Start Frontend (New Window)
+Double-click `start-frontend.bat` or run:
 ```powershell
 cd frontend
 yarn start
@@ -202,7 +214,7 @@ yarn start
 
 ## 🔧 Troubleshooting
 
-### Error: "Can't connect to MySQL server"
+### Error: "Can't connect to MySQL server on 'localhost:3307'"
 
 **Check if MySQL is running:**
 ```powershell
@@ -212,28 +224,27 @@ sc query MySQL80
 net start MySQL80
 ```
 
+**Check if MySQL is using port 3307:**
+```powershell
+netstat -an | findstr "3307"
+# Should show LISTENING on 0.0.0.0:3307
+```
+
 **Check firewall:**
 - Windows Defender Firewall might block MySQL
-- Add exception for MySQL (port 3306)
+- Add exception for MySQL (port 3307)
 
 ### Error: "Access denied for user 'root'@'localhost'"
 
 **Wrong password:**
 1. Check your password in `.env`
-2. Try resetting MySQL root password:
-   ```powershell
-   # Stop MySQL
-   net stop MySQL80
-   
-   # Start in safe mode and reset password
-   # (Search online for "reset MySQL root password Windows")
-   ```
+2. Try resetting MySQL root password
 
 ### Error: "Unknown database 'crypto_arbitrage'"
 
 **Database not created:**
 ```powershell
-mysql -u root -p
+mysql -u root -p -P 3307
 CREATE DATABASE crypto_arbitrage;
 exit;
 ```
@@ -244,7 +255,7 @@ exit;
 1. Run all CREATE TABLE statements from `database_schema.sql`
 2. Or import the schema file:
    ```powershell
-   mysql -u root -p crypto_arbitrage < database_schema.sql
+   mysql -u root -p -P 3307 crypto_arbitrage < database_schema.sql
    ```
 
 ### Error: "Module 'aiomysql' not found"
@@ -257,6 +268,27 @@ pip install aiomysql PyMySQL
 
 ---
 
+## 🆕 New Fail-Safe Arbitrage Feature
+
+The database now includes support for **fail-safe arbitrage execution**:
+
+### New Settings Available:
+- **target_sell_spread**: Target spread % to trigger sell (default: 85%)
+- **spread_check_interval**: Seconds between spread checks (default: 10)
+- **max_wait_time**: Max time to wait for target spread in seconds (default: 3600 = 1 hour)
+
+### How Fail-Safe Works:
+1. **Fund first CEX** and immediately buy token
+2. **Withdraw** purchased token to external wallet
+3. **Fund second CEX** and wait
+4. **Monitor spread** continuously
+5. **Only sell** when spread hits target (85% default)
+6. If spread never hits target within max_wait_time, sell anyway (fail-safe)
+
+This protects your investment by ensuring you only sell at favorable conditions.
+
+---
+
 ## 📊 MySQL Management Tools
 
 ### MySQL Workbench (Recommended)
@@ -265,15 +297,10 @@ pip install aiomysql PyMySQL
 - Easy to view data, run queries
 - Execute SQL scripts
 
-### phpMyAdmin (Optional)
-- Web-based management
-- Requires separate installation
-- Good for those familiar with it
-
 ### Command Line (Advanced)
 ```powershell
-# Login
-mysql -u root -p
+# Login (port 3307)
+mysql -u root -p -P 3307
 
 # Use database
 USE crypto_arbitrage;
@@ -285,6 +312,7 @@ SHOW TABLES;
 SELECT * FROM settings;
 SELECT * FROM tokens;
 SELECT * FROM exchanges;
+SELECT * FROM failsafe_states;
 
 # Count records
 SELECT COUNT(*) FROM arbitrage_opportunities;
@@ -299,8 +327,8 @@ exit;
 
 ### Create Non-Root User (Recommended)
 ```sql
--- Login as root
-mysql -u root -p
+-- Login as root (port 3307)
+mysql -u root -p -P 3307
 
 -- Create new user
 CREATE USER 'arbitrage_user'@'localhost' IDENTIFIED BY 'strong_password_here';
@@ -311,51 +339,13 @@ FLUSH PRIVILEGES;
 
 -- Test new user
 exit;
-mysql -u arbitrage_user -p
+mysql -u arbitrage_user -p -P 3307
 ```
 
 Then update `.env`:
 ```env
 MYSQL_USER=arbitrage_user
 MYSQL_PASSWORD=strong_password_here
-```
-
-### Secure MySQL Installation
-```powershell
-# Run secure installation script
-mysql_secure_installation
-
-# Answer:
-# - Set root password? [Already done]
-# - Remove anonymous users? YES
-# - Disallow root login remotely? YES
-# - Remove test database? YES
-# - Reload privilege tables? YES
-```
-
----
-
-## 📈 Performance Tuning (Optional)
-
-### MySQL Configuration
-Edit `my.ini` (usually in `C:\ProgramData\MySQL\MySQL Server 8.0\`)
-
-```ini
-[mysqld]
-# Increase buffer pool for better performance
-innodb_buffer_pool_size = 1G
-
-# Increase connections
-max_connections = 200
-
-# Optimize for SSDs
-innodb_flush_method = O_DIRECT
-```
-
-Restart MySQL after changes:
-```powershell
-net stop MySQL80
-net start MySQL80
 ```
 
 ---
@@ -365,8 +355,9 @@ net start MySQL80
 Before running the bot, verify:
 
 - [ ] MySQL installed and running (sc query MySQL80)
+- [ ] MySQL configured on **port 3307**
 - [ ] Database created (crypto_arbitrage)
-- [ ] All 6 tables created (SHOW TABLES)
+- [ ] All 7 tables created (SHOW TABLES)
 - [ ] .env file updated with MySQL credentials
 - [ ] Python dependencies installed (aiomysql)
 - [ ] Test connection successful (python test_mysql.py)
@@ -378,40 +369,33 @@ Before running the bot, verify:
 ## 🎯 Quick Start Summary
 
 ```powershell
-# 1. Install MySQL and create database
-mysql -u root -p
+# 1. Install MySQL (use port 3307 during installation)
+
+# 2. Create database
+mysql -u root -p -P 3307
 CREATE DATABASE crypto_arbitrage;
-# Run database_schema.sql
+SOURCE database_schema.sql;
+exit;
 
-# 2. Configure backend
+# 3. Configure backend
 cd backend
-# Edit .env file with MySQL credentials
+# Edit .env file with MySQL credentials (port 3307)
 
-# 3. Install dependencies
+# 4. Install dependencies
 venv\Scripts\activate
 pip install -r requirements.txt
 
-# 4. Start backend
-python server.py
+# 5. Start backend
+start-backend.bat  # Or: python -m uvicorn server:app --host 0.0.0.0 --port 8001 --reload
 
-# 5. Start frontend (new window)
-cd frontend
-yarn start
+# 6. Start frontend (new window)
+start-frontend.bat  # Or: cd frontend && yarn start
 ```
 
 ---
 
-## 📚 Additional Resources
-
-- **MySQL Documentation:** https://dev.mysql.com/doc/
-- **MySQL Workbench Guide:** https://dev.mysql.com/doc/workbench/en/
-- **MySQL Windows Install:** https://dev.mysql.com/doc/refman/8.0/en/windows-installation.html
-
----
-
-**🎉 MySQL setup complete! Your bot now uses MySQL instead of MongoDB.**
+**🎉 MySQL setup complete! Your bot is now configured with fail-safe arbitrage.**
 
 For application usage, see:
 - `/app/WINDOWS_SETUP_GUIDE.md` - General Windows setup
 - `/app/FULL_ARBITRAGE_IMPLEMENTED.md` - Features guide
-- `/app/LOCAL_INSTALLATION_COMPLETE_GUIDE.md` - Complete guide
