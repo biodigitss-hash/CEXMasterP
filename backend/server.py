@@ -2053,8 +2053,9 @@ app.add_middleware(
 async def startup_event():
     """Initialize database connection on startup"""
     try:
-        await mysql_db.connect()
-        logger.info("Application started successfully with MySQL")
+        await db_instance.connect()
+        db_type = "MongoDB" if IS_MONGODB else "MySQL"
+        logger.info(f"Application started successfully with {db_type}")
     except Exception as e:
         logger.error(f"Startup error: {e}")
         raise
@@ -2065,7 +2066,7 @@ async def shutdown_event():
     # Close all exchange instances
     await close_exchange_instances()
     
-    # Close MySQL connection
-    await mysql_db.close()
+    # Close database connection
+    await db_instance.close()
     
     logger.info("Application shutdown complete")
