@@ -185,7 +185,7 @@ yarn install
 # This takes 3-5 minutes
 ```
 
-#### 3.4 Create Frontend .env File
+#### 4.4 Create Frontend .env File
 Create a file named `.env` in the `frontend` folder:
 
 ```env
