@@ -211,7 +211,8 @@ yarn start
 3. ✅ No more KeyError
 
 ### Default Values (Used if .env is missing):
-- MongoDB URL: `mongodb://localhost:27017/`
+- MySQL Host: `localhost`
+- MySQL Port: `3306`
 - Database Name: `crypto_arbitrage`
 - Host: `0.0.0.0`
 - Port: `8001`
