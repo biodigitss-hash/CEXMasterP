@@ -110,7 +110,14 @@ venv\Scripts\activate
 ```powershell
 pip install -r requirements.txt
 
-# This takes 2-5 minutes
+# This installs all required packages including:
+# - fastapi
+# - aiomysql (MySQL driver)
+# - PyMySQL
+# - ccxt
+# - web3
+# - cryptography
+# - etc.
 ```
 
 #### 3.5 Create .env File (Optional but Recommended)
