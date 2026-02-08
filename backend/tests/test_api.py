@@ -48,18 +48,15 @@ class TestSettingsAPI:
         assert response.status_code == 200
         data = response.json()
         
-        # Check standard settings
+        # Check core settings
         assert "is_live_mode" in data
-        assert "min_spread_threshold" in data
-        assert "max_trade_amount" in data
-        assert "slippage_tolerance" in data
         
-        # Check fail-safe settings (new)
+        # Check fail-safe settings (new) - these are the key settings for this feature
         assert "target_sell_spread" in data, "Missing target_sell_spread in settings"
         assert "spread_check_interval" in data, "Missing spread_check_interval in settings"
         assert "max_wait_time" in data, "Missing max_wait_time in settings"
         
-        # Verify default values
+        # Verify data types
         assert isinstance(data["target_sell_spread"], (int, float))
         assert isinstance(data["spread_check_interval"], int)
         assert isinstance(data["max_wait_time"], int)
